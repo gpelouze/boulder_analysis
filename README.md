@@ -2,7 +2,7 @@
 
 ### Scraper
 
-~~~python
+~~~
 usage: scrape_boulders.py [-h] [--output OUTPUT] [--overwrite] [--append] url
 
 Scrape boulders page.
