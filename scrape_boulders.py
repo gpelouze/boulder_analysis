@@ -78,7 +78,7 @@ class Scraper(QWebEngineView):
         self.channel.registerObject('log_comm', self.log_comm);
         self.channel.registerObject('data_comm', self.data_comm);
 
-        with open('scraper.js') as f:
+        with open('scrape_boulders.js') as f:
             js_scraper = f.read()
         self.page().runJavaScript(js_scraper, print)
 
