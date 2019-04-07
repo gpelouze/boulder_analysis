@@ -2,122 +2,81 @@
 
 import datetime
 import os
-import sys
 
 import yaml
-from PyQt5.QtCore import QUrl, QObject, QSize, pyqtSlot
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineProfile, QWebEnginePage
-from PyQt5.QtWebChannel import QWebChannel
-from PyQt5.QtWidgets import QApplication
 
-class CustomProfile(QWebEngineProfile):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        try:
-            from fake_useragent import UserAgent
-            ua = UserAgent()
-            user_agent = ua.chrome
-            self.setHttpUserAgent(user_agent)
-        except ImportError:
-            pass
+from ddp_client import DDPClient
 
+VERBOSE = False
 
-class Communicator(QObject):
-    def __init__(self, app, verbose=False):
-        self.app = app
-        self.verbose = verbose
-        self.messages = []
-        super().__init__()
+class BouldersClient(DDPClient):
+    def __init__(self, url, gym):
+        super().__init__(url)
+        self.gym = gym
+        self.waiting_subs = set()
 
-    def _receive(self, msg):
-        if self.verbose:
-            print('--- Received:', msg)
-        self.messages.append(msg)
+    def on_ready(self, subs):
+        for sub in subs:
+            self.waiting_subs.remove(sub)
+        if not self.waiting_subs:
+            self.close()
 
-    @pyqtSlot()
-    def quitApp(self):
-        if self.verbose:
-            print('--- Received exit signal from js API')
-        self.app.quit()
+    def on_open(self):
+        super().on_open()
 
-class LogCommunicator(Communicator):
-    @pyqtSlot(str)
-    def receive(self, msg):
-        return self._receive(msg)
+        id_ = self.sub(
+            '_boulders.list', [{'gym': self.gym, 'isClosed': None}, {}, 10000])
+        self.waiting_subs.add(id_)
 
-class DataCommunicator(Communicator):
-    @pyqtSlot(list)
-    def receive(self, msg):
-        return self._receive(msg)
+    def on_message(self, msg):
+        msg = super().on_message(msg)
+        if VERBOSE:
+            print(msg)
 
-    def clean(self):
-        clean_data = []
-        for boulder in self.messages:
-            clean_data.append({k: v for k, v in boulder})
-        return clean_data
+class Output():
+    def __init__(self, args):
+        self.args = args
+        self.timestamp = datetime.datetime.now().isoformat(timespec='seconds')
 
-
-class Scraper(QWebEngineView):
-    def __init__(self, url):
-        self.html = None
-        self.app = QApplication([])
-        super().__init__()
-        profile = CustomProfile('storage', self)
-        webpage = QWebEnginePage(profile, self)
-        self.setPage(webpage)
-        self.loadFinished.connect(self._loadFinished)
-        self.load(QUrl(url))
-        self.show()
-        self.app.exec_()
-
-    def _loadFinished(self, result):
-        self.channel = QWebChannel(self.page())
-        self.page().setWebChannel(self.channel)
-        self.log_comm = LogCommunicator(self.app, verbose=True)
-        self.data_comm = DataCommunicator(self.app)
-        self.channel.registerObject('log_comm', self.log_comm);
-        self.channel.registerObject('data_comm', self.data_comm);
-
-        with open('scrape_boulders.js') as f:
-            js_scraper = f.read()
-        self.page().runJavaScript(js_scraper, print)
-
-
-def determine_output_file(args, timestamp=None):
-    if args.output is not None:
-        return args.output
-    else:
-        output = args.url
-        output = output.split('https://')[1].replace('/', '+')
-        if timestamp:
-            output += '_{}.yml'.format(timestamp)
+    @property
+    def filename(self):
+        if self.args.output is not None:
+            filename = self.args.output
         else:
-            output += '.yml'
-        return output
+            filename = self.args.gym.replace('/', '+')
+            if self.args.append:
+                filename += '.yml'
+            else:
+                filename += '_{}.yml'.format(self.timestamp)
+            return filename
 
-def determine_write_mode(args):
-    if os.path.exists(args.output):
-        if args.overwrite and args.append:
-            raise ValueError("received both --overwrite or --append")
-        if args.overwrite:
+    @property
+    def write_mode(self):
+        if os.path.exists(self.filename):
+            if self.args.overwrite and self.args.append:
+                raise ValueError('received both --overwrite or --append')
+            if self.args.overwrite:
+                return 'w'
+            elif self.args.append:
+                return 'a'
+            else:
+                raise ValueError('output file exists')
+        else:
             return 'w'
-        elif args.append:
-            return 'a'
-        else:
-            raise ValueError("output file exists")
-    else:
-        return 'w'
-
 
 if __name__ == '__main__':
 
     import argparse
     parser = argparse.ArgumentParser(
-        description='Scrape boulders page.')
+        description='Scrape boulders data.')
     parser.add_argument(
         'url',
         type=str,
-        help='address of the page to scrape')
+        help='websocket url')
+    parser.add_argument(
+        'gym',
+        type=str,
+        help='gym name')
     parser.add_argument(
         '--output', '-o',
         type=str,
@@ -131,19 +90,14 @@ if __name__ == '__main__':
         action='store_true',
         help='append to the output file if it exists')
     args = parser.parse_args()
+    output = Output(args)
 
-    timestamp = datetime.datetime.now().isoformat(timespec='seconds') 
-    if args.append:
-        args.output = determine_output_file(args)
-    else:
-        args.output = determine_output_file(args, timestamp=timestamp)
+    print('Scraping:', args.url, args.gym)
+    client = BouldersClient(args.url, args.gym)
+    client.run_forever()
+    data = client.collections['boulders']
 
-    print('Scraping:', args.url)
-    s = Scraper(args.url)
-
-    mode = determine_write_mode(args)
-    with open(args.output, mode) as f:
-        data = s.data_comm.clean()
-        yaml.dump({timestamp: data}, f,
+    with open(output.filename, output.write_mode) as f:
+        yaml.dump({output.timestamp: data}, f,
                   default_flow_style=False, allow_unicode=True)
-    print('Output written to:', args.output)
+    print('Output written to:', output.filename)

@@ -3,12 +3,14 @@
 ### Scraper
 
 ~~~
-usage: scrape_boulders.py [-h] [--output OUTPUT] [--overwrite] [--append] url
+usage: scrape_boulders.py [-h] [--output OUTPUT] [--overwrite] [--append]
+                          url gym
 
-Scrape boulders page.
+Scrape boulders data.
 
 positional arguments:
-  url                   address of the page to scrape
+  url                   websocket url
+  gym                   gym name
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -22,14 +24,10 @@ optional arguments:
 
 **Required:**
 
-- PyQt5 with QtWebEngine support (`pacman -S python-pyqtwebengine` on Arch Linux)
-- [PyYAML](https://github.com/yaml/pyyaml) (`pip install PyYAML`, or `pacman -S
-  python-yaml` on Arch Linux)
-
-**Optional:**
-
-- [fake-useragent](https://github.com/hellysmile/fake-useragent) (`pip install
-  fake-useragent`)
+- [websocket-client](https://github.com/websocket-client/websocket-client)
+  (`pip install websocket-client`)
+- [ejson](https://github.com/Yipit/ejson) (`pip install ejson`)
+- [PyYAML](https://github.com/yaml/pyyaml) (`pip install PyYAML`)
 
 
 ## License
