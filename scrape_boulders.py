@@ -2,6 +2,7 @@
 
 import datetime
 import os
+import multiprocessing as mp
 
 import yaml
 
@@ -64,6 +65,28 @@ class Output():
         else:
             return 'w'
 
+def worker(args):
+    client = BouldersClient(args.url, args.gym)
+    client.run_forever()
+    data = client.collections['boulders']
+
+    output = Output(args)
+    with open(output.filename, output.write_mode) as f:
+        yaml.dump({output.timestamp: data}, f,
+                  default_flow_style=False, allow_unicode=True)
+    print('Output written to:', output.filename)
+
+def scrape_boulders(args):
+    p = mp.Process(target=worker, args=(args,))
+    try:
+        p.start()
+        p.join(args.timeout)
+        if p.is_alive():
+            raise TimeoutError('client reached timeout')
+    finally:
+        p.terminate()
+
+
 if __name__ == '__main__':
 
     import argparse
@@ -89,15 +112,11 @@ if __name__ == '__main__':
         '--append', '-a',
         action='store_true',
         help='append to the output file if it exists')
+    parser.add_argument(
+        '--timeout',
+        type=int,
+        help='scraping timetout in seconds')
     args = parser.parse_args()
-    output = Output(args)
 
     print('Scraping:', args.url, args.gym)
-    client = BouldersClient(args.url, args.gym)
-    client.run_forever()
-    data = client.collections['boulders']
-
-    with open(output.filename, output.write_mode) as f:
-        yaml.dump({output.timestamp: data}, f,
-                  default_flow_style=False, allow_unicode=True)
-    print('Output written to:', output.filename)
+    scrape_boulders(args)
