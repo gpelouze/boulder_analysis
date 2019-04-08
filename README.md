@@ -4,7 +4,7 @@
 
 ~~~
 usage: scrape_boulders.py [-h] [--output OUTPUT] [--overwrite] [--append]
-                          [--timeout TIMEOUT]
+                          [--timeout TIMEOUT] [--repeat REPEAT]
                           url gym
 
 Scrape boulders data.
@@ -20,6 +20,7 @@ optional arguments:
   --overwrite           overwrite the output file if it exists
   --append, -a          append to the output file if it exists
   --timeout TIMEOUT     scraping timetout in seconds
+  --repeat REPEAT       repeat scraping every n seconds until killed
 ~~~
 
 ## Dependencies

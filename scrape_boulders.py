@@ -3,6 +3,7 @@
 import datetime
 import os
 import multiprocessing as mp
+import time
 
 import yaml
 
@@ -86,6 +87,14 @@ def scrape_boulders(args):
     finally:
         p.terminate()
 
+def scrape_boulders_loop(args):
+    while True:
+        start_time = time.time()
+        scrape_boulders(args)
+        elapsed = time.time() - start_time
+        remaining = args.repeat - elapsed
+        time.sleep(remaining)
+
 
 if __name__ == '__main__':
 
@@ -116,7 +125,14 @@ if __name__ == '__main__':
         '--timeout',
         type=int,
         help='scraping timetout in seconds')
+    parser.add_argument(
+        '--repeat',
+        type=int,
+        help='repeat scraping every n seconds until killed')
     args = parser.parse_args()
 
     print('Scraping:', args.url, args.gym)
-    scrape_boulders(args)
+    if args.repeat:
+        scrape_boulders_loop(args)
+    else:
+        scrape_boulders(args)
