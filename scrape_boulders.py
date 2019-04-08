@@ -48,7 +48,7 @@ class Output():
                 filename += '.yml'
             else:
                 filename += '_{}.yml'.format(self.timestamp)
-            return filename
+        return filename
 
     @property
     def write_mode(self):
