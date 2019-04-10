@@ -38,7 +38,7 @@ class BouldersClient(DDPClient):
 class Output():
     def __init__(self, args):
         self.args = args
-        self.timestamp = datetime.datetime.now().isoformat(timespec='seconds')
+        self.timestamp = datetime.datetime.now().isoformat()
 
     @property
     def filename(self):
