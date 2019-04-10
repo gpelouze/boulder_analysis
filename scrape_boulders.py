@@ -83,7 +83,11 @@ def scrape_boulders(args):
         p.start()
         p.join(args.timeout)
         if p.is_alive():
-            raise TimeoutError('client reached timeout')
+            p.terminate()
+            if args.exit_on_timeout:
+                raise TimeoutError('client reached timeout')
+            else:
+                print('client reached timeout')
     finally:
         p.terminate()
 
@@ -124,11 +128,17 @@ if __name__ == '__main__':
     parser.add_argument(
         '--timeout',
         type=int,
-        help='scraping timetout in seconds')
+        help='scraping timeout in seconds')
     parser.add_argument(
         '--repeat',
         type=int,
         help='repeat scraping every n seconds until killed')
+    parser.add_argument(
+        '--no-exit-on-timeout',
+        dest='exit_on_timeout',
+        action='store_false',
+        help=("don't exit on timeout (but still terminate current scraping); "
+              "useful for with --repeat"))
     args = parser.parse_args()
 
     print('Scraping:', args.url, args.gym)
