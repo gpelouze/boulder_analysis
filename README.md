@@ -5,6 +5,7 @@
 ~~~
 usage: scrape_boulders.py [-h] [--output OUTPUT] [--overwrite] [--append]
                           [--timeout TIMEOUT] [--repeat REPEAT]
+                          [--no-exit-on-timeout]
                           url gym
 
 Scrape boulders data.
@@ -19,18 +20,21 @@ optional arguments:
                         yaml file where the results are saved
   --overwrite           overwrite the output file if it exists
   --append, -a          append to the output file if it exists
-  --timeout TIMEOUT     scraping timetout in seconds
+  --timeout TIMEOUT     scraping timeout in seconds
   --repeat REPEAT       repeat scraping every n seconds until killed
+  --no-exit-on-timeout  don't exit on timeout (but still terminate current
+                        scraping); useful for with --repeat
 ~~~
+
 
 ## Dependencies
 
-**Required:**
-
-- [websocket-client](https://github.com/websocket-client/websocket-client)
-  (`pip install websocket-client`)
-- [ejson](https://github.com/Yipit/ejson) (`pip install ejson`)
-- [PyYAML](https://github.com/yaml/pyyaml) (`pip install PyYAML`)
+- [dateutil](https://pypi.org/project/python-dateutil)
+- [ejson](https://pypi.org/project/ejson)
+- [pandas](https://pypi.org/project/pandas)
+- [PyYAML](https://pypi.org/project/PyYAML)
+- [tqdm](https://pypi.org/project/tqdm)
+- [websocket-client](https://pypi.org/project/websocket_client)
 
 
 ## License
