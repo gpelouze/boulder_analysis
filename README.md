@@ -31,6 +31,7 @@ optional arguments:
 
 - [dateutil](https://pypi.org/project/python-dateutil)
 - [ejson](https://pypi.org/project/ejson)
+- [Matplotlib](https://pypi.org/project/matplotlib)
 - [pandas](https://pypi.org/project/pandas)
 - [PyYAML](https://pypi.org/project/PyYAML)
 - [tqdm](https://pypi.org/project/tqdm)
