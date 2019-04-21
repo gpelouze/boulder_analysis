@@ -45,7 +45,10 @@ class Output():
         if self.args.output is not None:
             filename = self.args.output
         else:
-            filename = self.args.gym.replace('/', '+')
+            filename = os.path.join(
+                self.args.output_dir,
+                self.args.gym.replace('/', '+'))
+            os.makedirs(self.args.output_dir, exist_ok=True)
             if self.args.append:
                 filename += '.yml'
             else:
@@ -117,6 +120,11 @@ if __name__ == '__main__':
         '--output', '-o',
         type=str,
         help='yaml file where the results are saved')
+    parser.add_argument(
+        '--output-dir',
+        type=str,
+        default='.',
+        help='directory where results are saved if --output is not specified')
     parser.add_argument(
         '--overwrite',
         action='store_true',
