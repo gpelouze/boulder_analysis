@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import datetime
-import glob
 
 from dateutil.parser import parse as parse_date
 import pandas as pd
@@ -51,14 +50,13 @@ def _get_all_prop_values(yaml_data, dates, b_id, prop, func=None):
                 values.append(func(boulder[prop]))
     return values
 
-def boulders_yaml_to_dataframe(pattern):
+def boulders_yaml_to_dataframe(yaml_files):
     ''' Convert yaml files from scrape_boulders.py to a single dataframe
 
     Parameters
     ==========
-    pattern : str
-        A glob pattern to yaml files written by scrape_boulders.py.
-        Eg. 'data/scraping/my_gym_*.yml'.
+    yaml_files : list of str
+        A list of yaml filenames written by scrape_boulders.py
 
     Returns
     =======
@@ -67,7 +65,7 @@ def boulders_yaml_to_dataframe(pattern):
         resolved values of sentsCount, likesCount, and likesRatio.
     '''
     yaml_data = {}
-    for fn in tqdm.tqdm(glob.glob(pattern), desc='Loading yaml data'):
+    for fn in tqdm.tqdm(yaml_files, desc='Loading yaml data'):
         with open(fn) as f:
             f_data = yaml.load(f)
             for k, v in f_data.items():

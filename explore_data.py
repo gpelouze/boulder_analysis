@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import glob
 import os
 import pickle
 
@@ -15,7 +16,8 @@ if __name__ == '__main__':
         with open(boulders_path, 'rb') as f:
             boulders = pickle.load(f)
     else:
-        boulders = manage_data.boulders_yaml_to_dataframe('data/scraping/*.yml')
+        filenames = glob.glob('data/scraping/*.yml')
+        boulders = manage_data.boulders_yaml_to_dataframe(filenames)
         with open(boulders_path, 'wb') as f:
             pickle.dump(boulders, f)
 
