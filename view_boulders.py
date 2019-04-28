@@ -85,7 +85,20 @@ def get_boulder_data_source(boulder):
 
 if __name__ == '__main__':
 
-    boulders = pd.read_pickle('data/reduced/latest_boulders.pkl')
+    import argparse
+    parser = argparse.ArgumentParser(
+        description='Create bokeh view of boulders sents')
+    parser.add_argument(
+        'input_pkl',
+        type=str,
+        help='pkl file containing the reduced boulders dataframe')
+    parser.add_argument(
+        'output_html',
+        type=str,
+        help='output plot html file')
+    args = parser.parse_args()
+
+    boulders = pd.read_pickle(args.input_pkl)
     for boulder in boulders.itertuples():
         boulder_age = (boulder.time.date - boulder.addedAt).dt.total_seconds()
         boulder_age /= 86400 # seconds to days
@@ -101,7 +114,7 @@ if __name__ == '__main__':
         callback=bk.models.OpenURL(url='@url'),
         )
 
-    bk.plotting.output_file('data/plots/boulders.html')
+    bk.plotting.output_file(args.output_html)
     p = bk.plotting.figure(
         title=list(set(boulders.gym))[0],
         x_axis_label='Problem age [days]',
