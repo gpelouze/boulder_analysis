@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import datetime
+import warnings
 
 from dateutil.parser import parse as parse_date
 import pandas as pd
@@ -44,10 +45,13 @@ def _get_all_prop_values(yaml_data, dates, b_id, prop, func=None):
     for date in dates:
         boulder = yaml_data[date].get(b_id)
         if boulder:
-            if func is None:
-                values.append(boulder[prop])
-            else:
-                values.append(func(boulder[prop]))
+            value = boulder.get(prop)
+            if func is not None:
+                try:
+                    value = func(value)
+                except:
+                    value = None
+            values.append(value)
     return values
 
 def boulders_yaml_to_dataframe(yaml_files):
@@ -69,9 +73,10 @@ def boulders_yaml_to_dataframe(yaml_files):
         with open(fn) as f:
             f_data = yaml.load(f)
             for k, v in f_data.items():
-                if k in yaml_data:
-                    raise ValueError('duplicate date in yaml_data')
-                yaml_data[k] = v
+                if k not in yaml_data:
+                    yaml_data[k] = v
+                else:
+                    warnings.warn('ignoring duplicate date in yaml_data')
 
     # extract date and boulder_id keys
     boulders_id = set([k for d in yaml_data.values() for k in d.keys()])
@@ -122,10 +127,14 @@ def boulders_yaml_to_dataframe(yaml_files):
     for b_id in boulders_id:
         boulder_props = {}
         for prop, func in boulder_props_use['attribute']:
-            values = _get_all_prop_values(yaml_data, dates_str, b_id, prop)[-1]
-            if func:
-                values = func(values)
-            boulder_props[prop] = values
+            values = _get_all_prop_values(yaml_data, dates_str, b_id, prop)
+            try:
+                value = values[-1]
+                if func:
+                    value = func(value)
+            except:
+                value = None
+            boulder_props[prop] = value
         time_data = {}
         for prop, func in boulder_props_use['time_series']:
             time_data[prop] = _get_all_prop_values(yaml_data, dates_str, b_id, prop, func=func)
