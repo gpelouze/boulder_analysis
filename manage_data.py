@@ -142,3 +142,14 @@ def boulders_yaml_to_dataframe(yaml_files):
         boulders_df = boulders_df.append([boulder_props])
     boulders_df = boulders_df.reset_index()
     return boulders_df
+
+def update_boulders(boulders, new_boulders):
+    for b_id, b in new_boulders.iterrows():
+        if b_id not in boulders.index:
+            boulders = boulders.append(b)
+        else:
+            old_b = boulders.loc[b_id]
+            time = pd.concat([old_b.time, b.time])
+            b.time = time
+            boulders.loc[b_id] = b
+    return boulders
