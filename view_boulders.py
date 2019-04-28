@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import pickle
+import datetime
 
 import bokeh as bk
 import bokeh.plotting
@@ -113,7 +113,8 @@ if __name__ == '__main__':
     p.add_tools(hover_tool)
     p.add_tools(tap_tool)
 
-    for boulder in boulders.itertuples():
+    plot_boulders = boulders[boulders.closedAt > datetime.datetime.now()]
+    for boulder in plot_boulders.itertuples():
         p.line(
             'boulderAge',
             'sentsCount',
