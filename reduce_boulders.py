@@ -93,6 +93,9 @@ if __name__ == '__main__':
     except FileNotFoundError:
         previous_boulders = None
         warnings.warn('found no previously reduced data')
+    except EOFError:
+        previous_boulders = None
+        warnings.warn('invalid previous boulders data')
 
     files_to_reduce = list_files_to_reduce(args.input_dir, previous_boulders)
     files_to_reduce = files_to_reduce
@@ -103,5 +106,6 @@ if __name__ == '__main__':
     with open(output.filename, output.write_mode) as f:
         pickle.dump(boulders, f)
 
-    os.unlink(output.filename_latest)
-    os.symlink(output.filename, output.filename_latest)
+    if os.path.exists(output.filename_latest):
+        os.unlink(output.filename_latest)
+    os.symlink(os.path.basename(output.filename), output.filename_latest)
