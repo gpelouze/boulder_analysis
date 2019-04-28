@@ -11,15 +11,9 @@ import manage_data
 
 if __name__ == '__main__':
 
-    boulders_path = 'data/boulders.pkl'
-    if os.path.exists(boulders_path):
-        with open(boulders_path, 'rb') as f:
-            boulders = pickle.load(f)
-    else:
-        filenames = glob.glob('data/scraping/*.yml')
-        boulders = manage_data.boulders_yaml_to_dataframe(filenames)
-        with open(boulders_path, 'wb') as f:
-            pickle.dump(boulders, f)
+    boulders_path = 'data/reduced/latest_boulders.pkl'
+    with open(boulders_path, 'rb') as f:
+        boulders = pickle.load(f)
 
     colors = {
         2: '#FFEB3B',
@@ -49,4 +43,4 @@ if __name__ == '__main__':
     plt.title(list(set(boulders.gym))[0])
     plt.xlabel('Problem age [days]')
     plt.ylabel('Number of sents')
-    plt.savefig('plots/boulders.pdf')
+    plt.savefig('data/plots/boulders.pdf')
