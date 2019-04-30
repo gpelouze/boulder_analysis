@@ -22,53 +22,69 @@ class PlotData:
         3: 2,
         }
 
-    tooltip_attributes = (
-        # ('gym',  'gym', '@gym', 'printf', None),
-        # ('id',  'id', '@id', 'printf', None),
-        ('picture',  'pic', '<img src="@pic" width="100" height="100"></img>', 'printf', lambda p: p.zoom),
-        ('zone',  'zone', '@zone', 'printf', None),
-        ('holdsColor',  'grade', '$color[swatch]:grade', 'printf', lambda c: PlotData.holds_colors[c]),
-        ('grade',  'subGrade', '@subGrade', 'printf', lambda g: '{}/3'.format(g)),
-        # ('girly',  'girly', '@girly', 'printf', None), % always True
-        ('routeTypes',  'routeTypes', '@routeTypes', 'printf', None),
-        ('routeSetter',  'routeSetter', '@routeSetter', 'printf', None),
-        ('createdAt',  'createdAt', '@createdAt{%F}', 'datetime', pd.to_datetime),
-        ('addedAt',  'addedAt', '@addedAt{%F}', 'datetime', pd.to_datetime),
-        ('updatedAt',  'updatedAt', '@updatedAt{%F}', 'datetime', pd.to_datetime),
-        ('closedAt',  'closedAt', '@closedAt{%F}', 'datetime', pd.to_datetime),
-        ('url', 'url', '@url', 'printf', None),
-        # ('comment',  'comment', '@comment', 'printf', None), % there are never comments
-        )
+    def get_thumbnail(pic):
+        try:
+            return pic.zoom
+        except AttributeError:
+            pass
 
-    time_series = (
+    data = [
+        # data source (in boulder), data name, process function
+        ('gym',  None, None),
+        ('id',  None, None),
+        ('picture',  'thumbnail', get_thumbnail),
+        ('zone',  None, None),
+        ('holdsColor',  None, lambda c: PlotData.holds_colors[c]),
+        ('grade',  None, lambda g: '{}/3'.format(g)),
+        ('routeTypes',  None, None),
+        ('routeSetter',  None, None),
+        ('createdAt',  None, pd.to_datetime),
+        ('addedAt',  None, pd.to_datetime),
+        ('updatedAt', None, pd.to_datetime),
+        ('closedAt', None, pd.to_datetime),
+        ('url', None, None),
+        ('comment', None, None),
+        ]
+
+    tooltips = [
+        ('Pic', '<img src="@thumbnail" width="100" height="100"></img>'),
+        ('Zone', '@zone'),
+        ('Grade', '$color[swatch]:holdsColor'),
+        ('Subgrade', '@grade'),
+        ('Route types', '@routeTypes'),
+        ('Routesetters', '@routeSetter'),
+        ('Created at', '@createdAt{%F}'),
+        # ('Added at', '@addedAt{%F}'),
+        # ('Updated at', '@updatedAt{%F}'),
+        ('Closed at', '@closedAt{%F}'),
+        ]
+
+    formatters = {
+        'createdAt': 'datetime',
+        'addedAt': 'datetime',
+        'updatedAt': 'datetime',
+        'closedAt': 'datetime',
+        }
+
+    time_series = [
         ('date', None),
         ('boulderAge', None),
         ('likesCount', None),
         ('likesRatio', None),
         ('sentsCount', None),
-        )
-
-    @property
-    def tooltip_data(self):
-        return [(ta[0], ta[1], ta[4]) for ta in self.tooltip_attributes]
-
-    @property
-    def tooltips(self):
-        return [(ta[1], ta[2]) for ta in self.tooltip_attributes]
-
-    @property
-    def formatters(self):
-        return {ta[1]: ta[3] for ta in self.tooltip_attributes}
+        ]
 
 def get_boulder_data_source(boulder):
     n = len(boulder.time.index)
     boulder_data = boulder._asdict()
     source_data = {}
     plot_data = PlotData()
-    for key_src, key_dst, func in plot_data.tooltip_data:
+    for key_src, key_dst, func in plot_data.data:
         data = boulder_data[key_src]
         if func:
             data = func(data)
+        if key_dst is None:
+            key_dst = key_src
         source_data[key_dst] = [data]*n
     for key, func in plot_data.time_series:
         data = boulder.time[key]
