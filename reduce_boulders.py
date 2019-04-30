@@ -5,6 +5,7 @@ import glob
 import os
 import pickle
 import re
+import sys
 import warnings
 
 from dateutil.parser import parse as parse_date
@@ -90,6 +91,9 @@ if __name__ == '__main__':
         warnings.warn('invalid previous boulders data')
 
     files_to_reduce = list_files_to_reduce(args.input_dir, previous_boulders)
+    if not files_to_reduce:
+        print('No new files to reduce')
+        sys.exit(0)
     new_boulders = manage_data.boulders_yaml_to_dataframe(files_to_reduce)
 
     boulders = manage_data.update_boulders(previous_boulders, new_boulders)
