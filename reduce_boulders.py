@@ -50,6 +50,7 @@ class Output():
     def __init__(self, args):
         self.args = args
         self.timestamp = datetime.datetime.now().isoformat()
+        self.timestamp = self.timestamp[:10]
 
     @property
     def filename(self):
