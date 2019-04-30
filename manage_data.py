@@ -140,7 +140,7 @@ def boulders_yaml_to_dataframe(yaml_files):
             time_data[prop] = _get_all_prop_values(yaml_data, dates_str, b_id, prop, func=func)
         boulder_props['time'] = pd.DataFrame(time_data)
         boulders_df = boulders_df.append([boulder_props])
-    boulders_df = boulders_df.reset_index()
+    boulders_df = boulders_df.set_index(boulders_df.id)
     return boulders_df
 
 def update_boulders(boulders, new_boulders):
