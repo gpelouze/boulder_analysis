@@ -49,7 +49,6 @@ class Output():
     def __init__(self, args):
         self.args = args
         self.timestamp = datetime.datetime.now().isoformat()
-        self.write_mode # raise exception if output file exists
 
     @property
     def filename(self):
@@ -61,13 +60,6 @@ class Output():
     @property
     def filename_latest(self):
         return os.path.join(self.args.output_dir, 'latest_boulders.pkl')
-
-    @property
-    def write_mode(self):
-        if os.path.exists(self.filename):
-            raise ValueError('output file exists')
-        else:
-            return 'wb'
 
 
 if __name__ == '__main__':
@@ -98,13 +90,11 @@ if __name__ == '__main__':
         warnings.warn('invalid previous boulders data')
 
     files_to_reduce = list_files_to_reduce(args.input_dir, previous_boulders)
-    files_to_reduce = files_to_reduce
     new_boulders = manage_data.boulders_yaml_to_dataframe(files_to_reduce)
 
     boulders = manage_data.update_boulders(previous_boulders, new_boulders)
 
-    with open(output.filename, output.write_mode) as f:
-        pickle.dump(boulders, f)
+    pd.to_pickle(boulders, output.filename)
 
     if os.path.exists(output.filename_latest):
         os.unlink(output.filename_latest)
