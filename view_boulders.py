@@ -6,10 +6,6 @@ import bokeh as bk
 import bokeh.plotting
 import pandas as pd
 
-def get_site_url(id_):
-    base_url = '{}'
-    return base_url.format(id_)
-
 class PlotData:
     holds_colors = {
         2: '#FFEB3B',
@@ -40,7 +36,7 @@ class PlotData:
         ('addedAt',  'addedAt', '@addedAt{%F}', 'datetime', pd.to_datetime),
         ('updatedAt',  'updatedAt', '@updatedAt{%F}', 'datetime', pd.to_datetime),
         ('closedAt',  'closedAt', '@closedAt{%F}', 'datetime', pd.to_datetime),
-        ('id', 'url', '@url', 'printf', get_site_url),
+        ('url', 'url', '@url', 'printf', None),
         # ('comment',  'comment', '@comment', 'printf', None), % there are never comments
         )
 

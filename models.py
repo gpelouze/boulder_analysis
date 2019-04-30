@@ -14,6 +14,8 @@ class PictureCrop():
             self.ejson_crop = ejson_crop
 
 class Picture():
+    host = ''
+
     def __init__(self, ejson_picture):
         ejson_picture = ejson_picture.copy()
         self.id = ejson_picture.pop('id')
@@ -36,3 +38,17 @@ class Picture():
     @property
     def zoom(self):
         return '{self.host}/bouldersZooms/{self.zoom_id}.jpg'.format(**locals())
+
+class BoulderPage():
+    host = ''
+
+    def __init__(self, b_id, gym):
+        self.b_id = b_id
+        self.gym = gym
+
+    @property
+    def url(self):
+        return '{self.host}/{self.gym}?b={self.b_id}'.format(**locals())
+
+def get_boulder_page_url(*args):
+    return BoulderPage(*args).url

@@ -109,6 +109,9 @@ def boulders_yaml_to_dataframe(yaml_files):
             ('updatedAt', ejson_date_to_datetime),
             ('zone', int),
             ),
+        'derived_attributes': ( # properties derived from above processed attributes
+            ('url', ('id', 'gym'), models.get_boulder_page_url),
+            ),
         'time_series': (
             ('date', None),
             ('likesCount', None),
@@ -135,6 +138,10 @@ def boulders_yaml_to_dataframe(yaml_files):
             except:
                 value = None
             boulder_props[prop] = value
+        for new_prop, src_props, func in boulder_props_use['derived_attributes']:
+            src_props_values = [boulder_props[p] for p in src_props]
+            value = func(*src_props_values)
+            boulder_props[new_prop] = value
         time_data = {}
         for prop, func in boulder_props_use['time_series']:
             time_data[prop] = _get_all_prop_values(yaml_data, dates_str, b_id, prop, func=func)
