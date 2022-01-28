@@ -151,6 +151,8 @@ def boulders_yaml_to_dataframe(yaml_files):
     return boulders_df
 
 def update_boulders(boulders, new_boulders):
+    if boulders is None:
+        return new_boulders  # nothing to update
     for b_id, b in new_boulders.iterrows():
         if b_id not in boulders.index:
             boulders = boulders.append(b)
