@@ -16,12 +16,6 @@ class PlotData:
         7: '#8A2BE2',
         }
 
-    grades_linewidths = {
-        1: .5,
-        2: 1,
-        3: 2,
-        }
-
     def get_thumbnail(pic):
         try:
             return pic.zoom
@@ -35,7 +29,7 @@ class PlotData:
         ('picture',  'thumbnail', get_thumbnail),
         ('zone',  None, None),
         ('holdsColor',  None, lambda c: PlotData.holds_colors[c]),
-        ('grade',  None, lambda g: '{}/3'.format(g)),
+        ('grade',  None, lambda g: '{}'.format(g)),
         ('routeTypes',  None, None),
         ('routeSetter',  None, None),
         ('createdAt',  None, pd.to_datetime),
@@ -143,7 +137,6 @@ if __name__ == '__main__':
         p.line(
             'boulderAge',
             'sentsCount',
-            line_width=plot_data.grades_linewidths[boulder.grade],
             line_color=plot_data.holds_colors[boulder.holdsColor],
             source=get_boulder_data_source(boulder),
             )
