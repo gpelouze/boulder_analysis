@@ -137,7 +137,7 @@ if __name__ == '__main__':
         p.line(
             'boulderAge',
             'sentsCount',
-            line_color=plot_data.holds_colors[boulder.holdsColor],
+            line_color=plot_data.holds_colors.get(boulder.holdsColor, '#777777'),
             source=get_boulder_data_source(boulder),
             )
 
