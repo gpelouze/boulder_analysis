@@ -16,6 +16,17 @@ class PlotData:
         7: '#8A2BE2',
         }
 
+    holds_colors_names = {
+        2: 'Yellow',
+        3: 'Green',
+        4: 'Blue',
+        5: 'Red',
+        6: 'Black',
+        7: 'Purple',
+        }
+
+    holds_colors_default_active = [2, 3, 4]
+
     def get_thumbnail(pic):
         try:
             return pic.zoom
@@ -133,12 +144,34 @@ if __name__ == '__main__':
     p.add_tools(tap_tool)
 
     plot_boulders = boulders[boulders.closedAt > datetime.datetime.now()]
+    lines = []
     for boulder in plot_boulders.itertuples():
-        p.line(
+        l = p.line(
             'boulderAge',
             'sentsCount',
             line_color=plot_data.holds_colors.get(boulder.holdsColor, '#777777'),
             source=get_boulder_data_source(boulder),
+            tags=[boulder.holdsColor],
             )
+        lines.append(l)
 
-    bk.plotting.save(p)
+    checkbox_group = bk.models.CheckboxGroup(
+        labels=list(PlotData.holds_colors_names.values()),
+        active=PlotData.holds_colors_default_active,
+        width=100,
+        )
+    checkbox_callback = bk.models.callbacks.CustomJS(
+        args=dict(lines=lines),
+        code="""
+            for (let l of lines) {
+                let color = l.glyph.tags[0];
+                let visible = (cb_obj.active.indexOf(color - 2) >= 0)
+                l.visible = visible;
+                // console.log(l.id + " " + color + " " + visible);
+            }
+            """,
+        )
+    checkbox_group.js_on_change('active', checkbox_callback)
+
+    l = bk.layouts.row(checkbox_group, p)
+    bk.plotting.save(l)
